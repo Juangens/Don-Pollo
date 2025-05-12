@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.dozer.DozerBeanMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,11 @@ public class ProductoServicesImpl implements ProductoServices {
 
 	private final ProductoPLRepository productoPLRepository;
 	private final DozerBeanMapper mapper;
+	
+	private String exchange = "exchange1.productos";
+	private String routingKey = "productos";
+	
+	private final RabbitTemplate rabbitTemplate = new RabbitTemplate();
 	
 	public ProductoServicesImpl(ProductoPLRepository productoRepository, DozerBeanMapper mapper) {
 		this.productoPLRepository = productoRepository;

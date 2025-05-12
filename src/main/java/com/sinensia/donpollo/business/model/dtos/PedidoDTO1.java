@@ -1,5 +1,7 @@
 package com.sinensia.donpollo.business.model.dtos;
 
+import java.io.Serializable;
+
 /**
  * numeroPedido: El número de pedido en forma de int
  * establecimiento: El nombre en mayúscula
@@ -25,5 +27,5 @@ public record PedidoDTO1(int numeroPedido,
 						 String fecha, 
 						 String hora, 
 						 String estado, 
-						 String dependiente) {
+						 String dependiente) implements Serializable {
 }

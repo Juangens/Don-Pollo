@@ -39,6 +39,7 @@ public class ClienteController {
 		Optional<Cliente> optional = clienteServices.read(id);
 		
 		if (optional.isEmpty()) {
+			
 			return new ResponseEntity<>(new ErrorResponse("No existe el cliente " + id), HttpStatus.NOT_FOUND);
 		}
 		

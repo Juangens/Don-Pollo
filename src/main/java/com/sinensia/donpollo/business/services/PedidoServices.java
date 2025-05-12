@@ -89,4 +89,6 @@ public interface PedidoServices {
 	
 	List<PedidoDTO1> getDTO1();
 	
+	
+	void enviarMensaje(String mensaje, PedidoDTO1 dto);
 }

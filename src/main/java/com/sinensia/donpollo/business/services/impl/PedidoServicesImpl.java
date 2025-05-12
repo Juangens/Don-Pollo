@@ -8,9 +8,15 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.dozer.DozerBeanMapper;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.connection.Connection;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import com.sinensia.donpollo.business.config.BusinessException;
+import com.sinensia.donpollo.business.model.EstadoPedido;
 import com.sinensia.donpollo.business.model.Pedido;
 import com.sinensia.donpollo.business.model.dtos.PedidoDTO1;
 import com.sinensia.donpollo.business.services.PedidoServices;
@@ -29,9 +35,15 @@ public class PedidoServicesImpl implements PedidoServices{
 	private final PedidoPLRepository pedidoPLRepository;
 	private final DozerBeanMapper mapper;
 	
-	public PedidoServicesImpl(PedidoPLRepository pedidoRepository, DozerBeanMapper mapper) {
+	private String exchange = "exchange5.pedidos";
+	private String routingKey = "pedidos.entrega";
+	
+	private final RabbitTemplate rabbitTemplate;
+	
+	public PedidoServicesImpl(PedidoPLRepository pedidoRepository, DozerBeanMapper mapper, RabbitTemplate rabbitTemplate) {
 		this.pedidoPLRepository = pedidoRepository;
 		this.mapper = mapper;
+		this.rabbitTemplate = rabbitTemplate;
 	}
 	
 	@Override
@@ -84,6 +96,16 @@ public class PedidoServicesImpl implements PedidoServices{
 		// TODO Comprobar validez de estados!
 		
 		pedidoPLRepository.save(mapper.map(pedido, PedidoPL.class));
+		
+		
+		if(pedido.getEstado() == EstadoPedido.PENDIENTE_ENTREGA) {
+			
+			PedidoDTO1 dto = new PedidoDTO1(pedido.getId().intValue(), pedido.getEstablecimiento().getNombre(), formateadorHora.format(pedido.getFechaHora()), formateadorFecha.format(pedido.getFechaHora()), pedido.getEstado().name(), pedido.getDependiente().getId().toString());
+			
+			enviarMensaje("Pedido actualizado a ", dto);
+		}
+		
+		
 	}
 
 	@Override
@@ -223,4 +245,12 @@ public class PedidoServicesImpl implements PedidoServices{
 				.toList();
 	}
 	
+	
+	public void enviarMensaje(String mensaje, PedidoDTO1 pedidoDTO1) {
+		
+		rabbitTemplate.convertAndSend(exchange, routingKey, pedidoDTO1);
+		
+		System.out.println("Mensaje enviado: " + pedidoDTO1);
+	}
+
 }

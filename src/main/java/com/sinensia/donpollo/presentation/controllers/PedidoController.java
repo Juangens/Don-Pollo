@@ -96,5 +96,5 @@ public class PedidoController {
 
 	        return pedidoServices.getEstadisticaNumeroPedidosByEstablecimiento(desde, hasta);
 	} 
-
+	
 }
